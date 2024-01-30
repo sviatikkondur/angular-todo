@@ -4,12 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import {
   BehaviorSubject,
   Observable,
-  ReplaySubject,
-  Subject,
-  switchMap,
+  concatMap,
+  forkJoin,
+  map,
+  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { MessageService } from './message.service';
 
 const USER_ID = 11826;
 
@@ -28,8 +30,14 @@ const todosFromServer: Todo[] = [
 export class TodosService {
   private todos$$ = new BehaviorSubject<Todo[]>([]);
   todos$ = this.todos$$.asObservable();
+  completedTodos$ = this.todos$.pipe(
+    map((todos) => todos.filter((todo) => todo.completed))
+  );
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private messageService: MessageService
+  ) {}
 
   loadTodos() {
     return this.http.get<Todo[]>(`${API_URL}/todos?userId=${USER_ID}`).pipe(
@@ -71,6 +79,23 @@ export class TodosService {
       tap(([_, todos]) => {
         this.todos$$.next(todos.filter((todo) => todo.id !== todoId));
       })
+    );
+  }
+
+  clearCompletedTodos() {
+    return this.completedTodos$.pipe(
+      concatMap((todos) => {
+        const deleteRequests = todos.map((todo) =>
+          this.http.delete<Todo>(`${API_URL}/todos/${todo.id}`).pipe(
+            withLatestFrom(this.todos$$),
+            tap(([_, todos]) => {
+              this.todos$$.next(todos.filter((t) => t.id !== todo.id));
+            })
+          )
+        );
+        return forkJoin(deleteRequests);
+      }),
+      take(1),
     );
   }
 }

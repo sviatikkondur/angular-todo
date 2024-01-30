@@ -10,7 +10,11 @@
 
     <section class="todoapp__main">
       <app-todo
-        *ngFor="let todo of visibleTodos$ | async; let i = index; trackBy: trackById"
+        *ngFor="
+          let todo of visibleTodos$ | async;
+          let i = index;
+          trackBy: trackById
+        "
         [todo]="todo"
         (delete)="deleteTodo(todo.id)"
         (rename)="renameTodo(todo, $event)"
@@ -28,7 +32,9 @@
 
       <app-filter></app-filter>
 
-      <button class="todoapp__clear-completed">Clear completed</button>
+      <button class="todoapp__clear-completed" (click)="clearCompletedTodos()">
+        Clear completed
+      </button>
     </footer>
   </div>
 

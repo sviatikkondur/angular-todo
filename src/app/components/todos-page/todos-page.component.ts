@@ -11,7 +11,7 @@ import { Status } from '../../types/status';
   templateUrl: './todos-page.component.html',
   styleUrl: './todos-page.component.scss',
 })
-export class TodosPageComponent implements OnInit, OnDestroy {
+export class TodosPageComponent implements OnInit {
   todos$ = this.todosService.todos$;
   activeTodos$ = this.todos$.pipe(
     distinctUntilChanged(),
@@ -46,10 +46,6 @@ export class TodosPageComponent implements OnInit, OnDestroy {
     this.todosService.loadTodos().subscribe({
       error: () => this.messageService.showMessage('Unable to laod todo'),
     });
-  }
-
-  ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
   }
 
   trackById(i: number, todo: Todo) {
@@ -87,6 +83,13 @@ export class TodosPageComponent implements OnInit, OnDestroy {
   deleteTodo(todoId: number) {
     this.todosService.deleteTodo(todoId).subscribe({
       error: () => this.messageService.showMessage('Unable to delete todo'),
+    });
+  }
+
+  clearCompletedTodos() {
+    this.todosService.clearCompletedTodos().subscribe({
+      error: () =>
+        this.messageService.showMessage('Unable to clear completed todo'),
     });
   }
 }
