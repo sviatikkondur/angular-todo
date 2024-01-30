@@ -32,7 +32,11 @@
 
       <app-filter></app-filter>
 
-      <button class="todoapp__clear-completed" (click)="clearCompletedTodos()">
+      <button
+        class="todoapp__clear-completed"
+        [class.hidden]="(completedTodos$ | async)?.length === 0"
+        (click)="clearCompletedTodos()"
+      >
         Clear completed
       </button>
     </footer>
